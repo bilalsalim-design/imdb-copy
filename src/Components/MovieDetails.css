@@ -1,0 +1,67 @@
+.details{
+    position: relative;
+    width: 100%;
+    height:100%;
+    background-color: rgb(29, 28, 28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+.details-general{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 0;
+}
+.details-general img{
+    border-radius: 10% 10% 0 0;
+}
+.details-general-name{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    gap: 6px;
+    margin:10px ;
+    padding: 0;
+}
+.details-general-name h3{
+    color: aliceblue;
+    margin: 0;
+    padding: 0;
+    font-size: 25px;
+}
+.details-general-name p{
+    color: rgb(189, 193, 197);
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+.details-general-Description{
+    padding: 0;
+    margin:0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.details-general-Description p{
+     color: rgb(231, 235, 240);
+     padding: 0;
+     margin: 0;
+}
+.closing-button{
+ position: absolute;
+  top: -60px;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+.details-general-buttons{
+    width: 100%;
+    gap: 10px;
+    display: flex;
+    flex-direction: row;
+}
