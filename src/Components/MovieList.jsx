@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StarIcon from "@mui/icons-material/Star";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
@@ -10,11 +10,37 @@ import Button from "@mui/material/Button";
 import unloadedImage from "./../assets/UnloadedImage.png";
 import MovieDetails from "./MovieDetails";
 import RatingArea from "./RatingArea";
+import { Links } from "../Links";
+import { GetData } from "../GetData";
 import "./MovieList.css";
 
-export default function MovieList({ movies, loading }) {
+export default function MovieList({ isACS, sortingType }) {
   const [selectedMovie, setSelecetedMovie] = useState(undefined);
-  const [ratingMovie , setRatingMovie] =useState(undefined)
+  const [isLoading, setIsLoading] = useState();
+  const [listeOfMovie, setListOfMovie] = useState([]);
+  const [ratingMovie, setRatingMovie] = useState(undefined);
+
+  useEffect(() => {
+    async function listingMovie() {
+      setIsLoading(true);
+      const name = Links.find((data) => data.name === sortingType);
+      const url = isACS ? name.url : name.DESCurl;
+      let movies = await GetData(url);
+      setListOfMovie(movies.titles);
+      let i = 0;
+      console.log(movies.nextPageToken);
+      setIsLoading(false);
+
+      while (movies.nextPageToken !== "") {
+        const pageToken = "&pageToken=";
+        movies = await GetData(url + pageToken + movies.nextPageToken);
+        setListOfMovie([...listeOfMovie, movies.titles]);
+        console.log(i++);
+      }
+    }
+
+    listingMovie();
+  }, [sortingType, isACS]);
 
   function handleEvent(movieData) {
     setRatingMovie(undefined);
@@ -23,7 +49,7 @@ export default function MovieList({ movies, loading }) {
     dialog.showModal();
   }
 
-  function HanleRating(name){
+  function HanleRating(name) {
     setSelecetedMovie(undefined);
     setRatingMovie(name);
     const dialog = document.getElementById("movieDetailsDialog");
@@ -31,7 +57,7 @@ export default function MovieList({ movies, loading }) {
   }
 
   function Listing() {
-    return movies.map((movieData) => {
+    return listeOfMovie.map((movieData , index) => {
       const runTimeInSeconds = movieData.runtimeSeconds || 0;
       const hour = Math.floor(runTimeInSeconds / 3600);
       const miniute = Math.floor(runTimeInSeconds / 3600 / 60);
@@ -39,7 +65,7 @@ export default function MovieList({ movies, loading }) {
         ? movieData.primaryImage?.url
         : unloadedImage;
       return (
-        <li key={movieData.id}>
+        <li key={index}>
           <div className="movie">
             <img src={imageUrl} />
             <div className="movieDiscription">
@@ -97,8 +123,8 @@ export default function MovieList({ movies, loading }) {
 
   return (
     <div className="movielist">
-      {!loading && <ul>{Listing()}</ul>}
-      {loading && (
+      {!isLoading && <ul>{Listing()}</ul>}
+      {isLoading && (
         <Box
           sx={{
             width: "50%",
@@ -114,9 +140,8 @@ export default function MovieList({ movies, loading }) {
       )}
       <dialog id="movieDetailsDialog">
         {selectedMovie && <MovieDetails movieDetails={selectedMovie} />}
-        {ratingMovie && <RatingArea movieName ={ratingMovie}/>}
+        {ratingMovie && <RatingArea movieName={ratingMovie} />}
       </dialog>
-     
     </div>
   );
 }

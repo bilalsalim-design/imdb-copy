@@ -3,19 +3,14 @@ import IconButton from "@mui/material/IconButton";
 import SouthIcon from '@mui/icons-material/South';
 import NorthIcon from '@mui/icons-material/North';
 import MovieList from "./MovieList";
-import { useState , useEffect} from "react";
-import { Links } from "../Links";
-import { GetData } from "../GetData";
+import { useState } from "react";
 
 export default function () {
 
     const[sortingType , setSortingType] = useState("movie");
-    const[listeOfMovie,setListOfMovie] = useState([]);
-    const[isLoading , setIsLoading] = useState();
     const[isACS , setIsASC] = useState(true);
 
     function handleChange(event){
-        console.log(event.target.value);
         setSortingType(event.target.value);
         if(!isACS){
           setIsASC(!isACS);
@@ -26,17 +21,7 @@ export default function () {
       setIsASC(!isACS)
     }
 
-    useEffect(() => {async function listingMovie()
-    {
-      setIsLoading(true);
-      const name=Links.find((data)=>data.name===sortingType);
-      const movies = await GetData(isACS ? name.url : name.DESCurl);
-      setListOfMovie(movies);
-      setIsLoading(false);
-    }
 
-    listingMovie();
-  },[sortingType,isACS])
 
   return (
     <div className="listingPanel">
@@ -57,7 +42,7 @@ export default function () {
              {!isACS && <NorthIcon />}
         </IconButton>
       </div>
-      <MovieList movies={listeOfMovie} loading={isLoading}/>
+      <MovieList isACS={isACS} sortingType={sortingType}/>
     </div>
   );
 }

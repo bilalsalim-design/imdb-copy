@@ -11,5 +11,5 @@ export async function GetData(url)
     {
         throw new Error("Failed to  fetch ");
     }
-    return resData.titles;
+    return resData;
 }
