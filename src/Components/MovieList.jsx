@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef ,memo} from "react";
 import StarIcon from "@mui/icons-material/Star";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
@@ -17,7 +17,8 @@ import "./MovieList.css";
 export default function MovieList({ isACS, sortingType }) {
   const [selectedMovie, setSelecetedMovie] = useState(undefined);
   const [isLoading, setIsLoading] = useState();
-  const [listeOfMovie, setListOfMovie] = useState([]);
+  const [lengthOfList, setlengthOfList] = useState(0);
+  let listeOfMovie = useRef([]);
   const [ratingMovie, setRatingMovie] = useState(undefined);
 
   useEffect(() => {
@@ -26,16 +27,16 @@ export default function MovieList({ isACS, sortingType }) {
       const name = Links.find((data) => data.name === sortingType);
       const url = isACS ? name.url : name.DESCurl;
       let movies = await GetData(url);
-      setListOfMovie(movies.titles);
-      let i = 0;
-      console.log(movies.nextPageToken);
+      listeOfMovie.current = movies.titles;
+       setlengthOfList(listeOfMovie.current.length);
       setIsLoading(false);
 
       while (movies.nextPageToken !== "") {
         const pageToken = "&pageToken=";
         movies = await GetData(url + pageToken + movies.nextPageToken);
-        setListOfMovie([...listeOfMovie, movies.titles]);
-        console.log(i++);
+        let list = movies.titles;
+        listeOfMovie.current.push(...list);
+        setlengthOfList(listeOfMovie.current.length);
       }
     }
 
@@ -56,8 +57,7 @@ export default function MovieList({ isACS, sortingType }) {
     dialog.showModal();
   }
 
-  function Listing() {
-    return listeOfMovie.map((movieData , index) => {
+  function Listing({movieData}) {
       const runTimeInSeconds = movieData.runtimeSeconds || 0;
       const hour = Math.floor(runTimeInSeconds / 3600);
       const miniute = Math.floor(runTimeInSeconds / 3600 / 60);
@@ -65,7 +65,7 @@ export default function MovieList({ isACS, sortingType }) {
         ? movieData.primaryImage?.url
         : unloadedImage;
       return (
-        <li key={index}>
+        <li key={movieData.id}>
           <div className="movie">
             <img src={imageUrl} />
             <div className="movieDiscription">
@@ -118,12 +118,15 @@ export default function MovieList({ isACS, sortingType }) {
           </div>
         </li>
       );
-    });
-  }
-
+    }
+  
+  const MovieDetailsListing = memo(Listing);
   return (
     <div className="movielist">
-      {!isLoading && <ul>{Listing()}</ul>}
+      {!isLoading && <ul>{listeOfMovie.current.slice(0,lengthOfList).map((movie , index) => (
+        <MovieDetailsListing movieData = {movie} key={index}/>
+
+      ))}</ul>}
       {isLoading && (
         <Box
           sx={{

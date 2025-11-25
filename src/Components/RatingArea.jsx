@@ -29,9 +29,9 @@ export default function RatingArea({ movieName }) {
           <polygon
             points="50,0 65,35 100,35 75,60 85,95 50,75 15,95 25,60 0,35 35,35"
             fill="#5799ef"
-            stroke-width="2"
+            strokeWidth="2"
           />
-         <text x="50" y="55" font-size="15" text-anchor="middle" fill="white">{ratingValue}</text>
+         <text x="50" y="55" fontSize="15" textAnchor="middle" fill="white">{ratingValue}</text>
        </svg>
       </div>
 
