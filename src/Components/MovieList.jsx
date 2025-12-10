@@ -71,9 +71,7 @@ export default function MovieList({ isACS, sortingType }) {
         fetchNextPage();
         setIsGetting(false);
 
-        console.log("byee");
       }
-      console.log("sjdgfsdjlhfgsdhf");
     };
     window.addEventListener("scroll", handleScroll);
     return () => {
@@ -88,7 +86,6 @@ export default function MovieList({ isACS, sortingType }) {
     const imageUrl = movieData.primaryImage?.url
       ? movieData.primaryImage?.url
       : unloadedImage;
-    console.log("hieeeee");
     return (
       <li key={movieData.id}>
         <div className="movie">
