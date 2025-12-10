@@ -19,57 +19,32 @@ import "./MovieList.css";
 export default function MovieList({ isACS, sortingType }) {
   const [selectedMovie, setSelecetedMovie] = useState(undefined);
   const [isGetting, setIsGetting] = useState();
-  const [lengthOfList, setlengthOfList] = useState(0);
-  const [nextPageData, setNextPageData] = useState();
-
-  let listeOfMovie = useRef([]);
   const [ratingMovie, setRatingMovie] = useState(undefined);
-  const isACSValue = isACS ? "ASC" : "DESC";
-  const name = Links.find((data) => data.name === sortingType);
-  const url = isACS ? name.url : name.DESCurl;
-  // Remove these:
-// const { data: movies, isLoading, isSuccess } = useQuery({ ... });
-// let fetchedData = useRef(undefined);
-// let listeOfMovie = useRef([]); 
-// const [lengthOfList, setlengthOfList] = useState(0);
-
-// Use this hook at the top level of your component:
-const {
-    data : movies, // This will be an object containing all pages
+  const {
+    data: movies,
     error,
-    fetchNextPage, // The function to call when the user scrolls down
-    hasNextPage, // Boolean: true if there is a nextPageToken
-     isLoading,
-    isFetchingNextPage, // Boolean: true while loading the next page
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetchingNextPage,
     status,
-    isSuccess
-} = useInfiniteQuery({
+    isSuccess,
+  } = useInfiniteQuery({
     queryKey: ["post", sortingType + (isACS ? "ASC" : "DESC")],
     queryFn: ({ pageParam }) => {
-        // Find the base URL
-        const name = Links.find((data) => data.name === sortingType);
-        const url = isACS ? name.url : name.DESCurl;
-        const pageToken = "&pageToken=";
+      const name = Links.find((data) => data.name === sortingType);
+      const url = isACS ? name.url : name.DESCurl;
+      const pageToken = "&pageToken=";
+      const finalUrl = pageParam ? url + pageToken + pageParam : url;
 
-        // Append the pageParam (which is the nextPageToken) if it exists
-        const finalUrl = pageParam ? url + pageToken + pageParam : url;
-        
-        return GetData(finalUrl);
+      return GetData(finalUrl);
     },
-    // This function tells React Query how to get the 'nextPageToken'
-    // from the previous page's response.
     getNextPageParam: (lastPage, allPages) => {
-        return lastPage.nextPageToken || undefined;
+      return lastPage.nextPageToken || undefined;
     },
-    initialPageParam: undefined, // Start without a page token
-});
-    if (movies) {
-    listeOfMovie.current = movies?.pages.flatMap(page => page.titles) || [];
-    setNextPageData(movies.nextPageToken || null);
-  }
-  useEffect(()=>{    setlengthOfList(listeOfMovie.current.length);
-},[listeOfMovie.current.length])
-
+    initialPageParam: undefined,
+  });
+  const listeOfMovie = movies?.pages.flatMap((page) => page.titles) || [];
 
   function handleEvent(movieData) {
     setRatingMovie(undefined);
@@ -85,41 +60,26 @@ const {
     dialog.showModal();
   }
 
-  /* useEffect(() => {
-    const handleScroll =  () => {
+  useEffect(() => {
+    const handleScroll = () => {
       const scrollTop = document.documentElement.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = window.innerHeight;
-      const threshold = 1;
-      if (
-        scrollTop + clientHeight >= scrollHeight - threshold &&
-        nextPageData
-      ) {
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
         setIsGetting(true);
-        const name = Links.find((data) => data.name === sortingType);
-        const url = isACS ? name.url : name.DESCurl;
-        const isACSValue = isACS ? "ASC" : "DESC";
-        const pageToken = "&pageToken=";
-        const {
-          data: balanceMovies,
-          isLoading: isGetting,
-        } = useQuery({
-          queryKey: ["post", sortingType + isACSValue + nextPageData],
-          queryFn: () => GetData(url + pageToken + nextPageData),
-        });
-
-        let list = balanceMovies.titles;
-        setNextPageData(balanceMovies.nextPageToken);
-        listeOfMovie.current.push(...list);
-        setlengthOfList(listeOfMovie.current.length);
+        fetchNextPage();
         setIsGetting(false);
+
+        console.log("byee");
       }
+      console.log("sjdgfsdjlhfgsdhf");
     };
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isACS, sortingType]); */
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   function Listing({ movieData }) {
     const runTimeInSeconds = movieData.runtimeSeconds || 0;
@@ -128,6 +88,7 @@ const {
     const imageUrl = movieData.primaryImage?.url
       ? movieData.primaryImage?.url
       : unloadedImage;
+    console.log("hieeeee");
     return (
       <li key={movieData.id}>
         <div className="movie">
@@ -189,8 +150,8 @@ const {
     <div className="movielist">
       {!isLoading && (
         <ul>
-          {listeOfMovie.current.slice(0, lengthOfList).map((movie, index) => (
-            <MovieDetailsListing movieData={movie} key={index} />
+          {listeOfMovie.map((movie, index) => (
+            <MovieDetailsListing movieData={movie} key={movie.id} />
           ))}
           {isGetting && (
             <Box
